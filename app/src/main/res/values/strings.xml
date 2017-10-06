@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MDB Social</string>
+    <string name="numinterested">Number Interested: </string>
 </resources>
