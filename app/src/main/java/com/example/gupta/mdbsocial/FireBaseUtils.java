@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,7 +59,7 @@ public class FireBaseUtils {
         }
     };
 
-
+    //Logs user in
     public static void logIn(String email, String password, final Context context) {
             if (!email.equals("") && !password.equals("")) {
                 mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener((Activity) context, new OnCompleteListener<AuthResult>() {
@@ -76,7 +77,7 @@ public class FireBaseUtils {
                 });
             }
     }
-
+    //Signs user up
     public static void attemptSignup(String email, String password, final Context context) {
         if (!email.equals("") && !password.equals("")) {
             mAuth.createUserWithEmailAndPassword(email, password)
@@ -94,7 +95,7 @@ public class FireBaseUtils {
                     });
         }
     }
-
+    // Adds new messages to be presented
     public static void addNew(int requestCode, int resultCode, Intent data, final Context context, final String name,
                               final String description, final String date){
         if (requestCode == 1 && resultCode == RESULT_OK) {
@@ -128,7 +129,7 @@ public class FireBaseUtils {
 
         }
     }
-
+    // Creaets the feed
    public static void feedActivity(final ArrayList<Message> messages, DatabaseReference ref, final Context context) {
         final RecyclerView recyclerAdapter = (RecyclerView)((Activity) context).findViewById(R.id.recyclerView);
         recyclerAdapter.setLayoutManager(new LinearLayoutManager((Activity) context));
@@ -154,7 +155,7 @@ public class FireBaseUtils {
         });
 
     }
-
+    // Attempts to set image to replace glide (Currently does not work)
     public static void setImage(final Context context, final Message m, final FeedAdapter.CustomViewHolder holder, final StorageReference ref) {
         class DownloadFilesTask extends AsyncTask<String, Void, Bitmap> {
             protected Bitmap doInBackground(String... strings) {
@@ -165,6 +166,7 @@ public class FireBaseUtils {
                 }
             }
             protected void onPostExecute(Bitmap result) {
+                ((Activity) context).findViewById(R.id.loadingPanel).setVisibility(View.GONE);
                 holder.imageView.setImageBitmap(result);
             }
         }

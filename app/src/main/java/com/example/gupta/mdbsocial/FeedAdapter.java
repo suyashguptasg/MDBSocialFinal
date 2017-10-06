@@ -42,27 +42,29 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CustomViewHold
             this.data = data;
         }
 
-
+        // Creates new CustomViewHolder
         @Override
         public CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_view, parent, false);
             return new CustomViewHolder(view);
         }
 
-
+        //Binds data to view holder
         @Override
         public void onBindViewHolder(final CustomViewHolder holder, int position) {
             Message m = data.get(position);
             holder.nameView.setText(m.name);
-            holder.interestedView.setText("Number interested: " + m.interested);
+            holder.interestedView.setText(context.getString(R.string.numinterested) + " " + m.interested);
             holder.emailView.setText(m.email);
+            //FireBaseUtils.setImage(this.context, m, holder, FirebaseStorage.getInstance().getReferenceFromUrl("gs://mdbsocial-d237d.appspot.com/").child(m.url + ".png"));
+            //Not able to get AsynchTask working
             Glide.with(context)
                     .using(new FirebaseImageLoader())
                     .load(FirebaseStorage.getInstance().getReferenceFromUrl("gs://mdbsocial-d237d.appspot.com/").child(m.url + ".png"))
                     .into(holder.imageView);
         }
 
-
+        // Returns number of items in data
         @Override
         public int getItemCount() {
             if (data != null) {
@@ -70,7 +72,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.CustomViewHold
             }
             return 0;
         }
-
+        // Passes through info about relevant event to DetailsActivity.class
         class CustomViewHolder extends RecyclerView.ViewHolder {
             TextView nameView;
             ImageView imageView;

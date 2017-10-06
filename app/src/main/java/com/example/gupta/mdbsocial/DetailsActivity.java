@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -15,8 +16,12 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.storage.FirebaseStorage;
 
 /**
@@ -27,6 +32,8 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
 
     Message m;
     Button back;
+
+    // Presents all the data, creates a switch for user to indicate interest
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +47,7 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
         ((TextView) findViewById(R.id.emailView)).setText(m.email);
         ((TextView) findViewById(R.id.descriptionView)).setText(m.description);
         ((TextView) findViewById(R.id.dateView)).setText(m.date);
-        ((TextView) findViewById(R.id.interestedView)).setText("Number Interested: " + m.interested);
+        ((TextView) findViewById(R.id.interestedView)).setText(getString(R.string.numinterested) + " " + m.interested);
         back = (Button) findViewById(R.id.back);
         back.setOnClickListener(this);
         Glide.with(this)
@@ -56,20 +63,45 @@ public class DetailsActivity extends AppCompatActivity implements View.OnClickLi
             public void onCheckedChanged(CompoundButton cb, boolean on) {
                 if (on) {
                     final DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-                    ref.child("messages").child(m.getUrl()).child("interested").setValue((String.valueOf(Integer.parseInt(m.interested) + 1)));
-                    m.setInterested((String.valueOf(Integer.parseInt(m.interested) + 1)));
-                    ((TextView) findViewById(R.id.interestedView)).setText("Number Interested: " + m.interested);
-                    Toast toast = Toast.makeText(getApplicationContext(), "You are interested in this event!", Toast.LENGTH_SHORT);
-                    toast.show();
+                    ref.runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            ref.child("messages").child(m.getUrl()).child("interested").setValue((String.valueOf(Integer.parseInt(m.interested) + 1)));
+                            m.setInterested((String.valueOf(Integer.parseInt(m.interested) + 1)));
+                            ((TextView) findViewById(R.id.interestedView)).setText("Number Interested: " + " " + m.interested);
+                            Toast toast = Toast.makeText(getApplicationContext(), "You are interested in this event!", Toast.LENGTH_SHORT);
+                            toast.show();
+                            return null;
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                            Log.d("error", "postTransaction:onComplete:" + databaseError);
+                        }
+                    });
+
                 } else {
                     final DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-                    ref.child("messages").child(m.getUrl()).child("interested").setValue((String.valueOf(Integer.parseInt(m.interested) - 1)));
-                    m.setInterested((String.valueOf(Integer.parseInt(m.interested) - 1)));
-                    ((TextView) findViewById(R.id.interestedView)).setText("Number Interested: " +  m.interested);
+                    ref.runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            ref.child("messages").child(m.getUrl()).child("interested").setValue((String.valueOf(Integer.parseInt(m.interested) - 1)));
+                            m.setInterested((String.valueOf(Integer.parseInt(m.interested) - 1)));
+                            ((TextView) findViewById(R.id.interestedView)).setText(getString(R.string.numinterested) +  m.interested);
+                            return null;
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                            Log.d("error", "postTransaction:onComplete:" + databaseError);
+                        }
+                    });
+
                 }
             }
         });
     }
+    // Adds listener to back button
     @Override
     public void onClick(View view) {
         startActivity(new Intent(DetailsActivity.this, FeedActivity.class));

@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private static FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -31,32 +31,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        (findViewById(R.id.loginButton)).setOnClickListener(this);
+        (findViewById(R.id.signupButton)).setOnClickListener(this);
 
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    Log.d("Login state:", "onAuthStateChange:signed_in:" + user.getUid());
-                } else {
-                    Log.d("Login state:", "onAuthStateChanged: signed_out");
-                }
-            }
-        };
-        ((Button) findViewById(R.id.loginButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                attemptLogin();
-            }
-        });
-
-        ((Button) findViewById(R.id.signupButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                attemptSignup();
-            }
-        });
         Glide.with(this).load("https://images-platform.99static.com/oxwBp_LS9TZoLaZc9Wq8DAuvXxk=/0x0:1668x1668/500x500/top/smart/99designs-contests-attachments/78/78423/attachment_78423913")
                 .override(750, 250).centerCrop().into(((ImageView) findViewById(R.id.imageView2)));
 
@@ -65,24 +42,24 @@ public class MainActivity extends AppCompatActivity {
     private void attemptLogin() {
         String email = ((EditText) findViewById(R.id.emailView)).getText().toString();
         String password = ((EditText) findViewById(R.id.passwordView)).getText().toString();
-        if (!email.equals("") && !password.equals("")) {
-            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    Log.d("Email", "signInWithEmail:onComplete:" + task.isSuccessful());
-                    if (!task.isSuccessful()) {
-                        Log.w("Email fail", "signInWithEmail:failed", task.getException());
-                        Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-                    } else {
-                        startActivity(new Intent(MainActivity.this, FeedActivity.class));
-                    }
-                }
-            });
-        }
+        FireBaseUtils.logIn(email, password, this);
     }
+
     // Move user to sign up screen
     private void attemptSignup() {
         startActivity(new Intent(MainActivity.this, SignUpActivity.class));
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.loginButton:
+                attemptLogin();
+                break;
+            case R.id.signupButton:
+                attemptSignup();
+                break;
+        }
     }
 }
 

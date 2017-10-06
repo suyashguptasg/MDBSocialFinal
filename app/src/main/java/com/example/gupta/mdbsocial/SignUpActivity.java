@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
  * Created by Gupta on 9/25/2017.
  */
 
-public class SignUpActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity  implements View.OnClickListener{
     private static FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -32,14 +32,7 @@ public class SignUpActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.signup);
-
-        mAuth = FirebaseAuth.getInstance();
-        ((Button) findViewById(R.id.signupButton)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                attemptSignup();
-            }
-        });
+        (findViewById(R.id.signupButton)).setOnClickListener(this);
 
         Glide.with(this).load("https://images-platform.99static.com/oxwBp_LS9TZoLaZc9Wq8DAuvXxk=/0x0:1668x1668/500x500/top/smart/99designs-contests-attachments/78/78423/attachment_78423913")
                 .override(750,250).centerCrop().into(((ImageView) findViewById(R.id.imageView2)));
@@ -48,22 +41,12 @@ public class SignUpActivity extends AppCompatActivity {
     public void attemptSignup() {
         String email = ((EditText) findViewById(R.id.emailView)).getText().toString();
         String password = ((EditText) findViewById(R.id.passwordView)).getText().toString();
+        FireBaseUtils.attemptSignup(email, password, this);
+    }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-
-                        if (!task.isSuccessful()){
-                            Toast.makeText(SignUpActivity.this, "Failed :(",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                        else {
-                            Intent intent = new Intent(getApplicationContext(), FeedActivity.class);
-                            startActivity(intent);
-                        }
-                    }
-                });
+    @Override
+    public void onClick(View v) {
+        attemptSignup();
     }
 }
 
